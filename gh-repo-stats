@@ -266,18 +266,24 @@ Header() {
       echo "Error getting GHE version"
       echo "${META_DATA}"
     else
-      VERSION=$(echo "${META_DATA}" | jq -r '.installed_version')
+      VERSION=$(echo "${META_DATA}" | jq -r '.installed_version // "unknown"')
 
-      # Get major/minor versions
-      VERSION_MAJOR=$(echo "${VERSION}" | cut -d "." -f 1);
-      VERSION_MINOR=$(echo "${VERSION}" | cut -d "." -f 2);
-
-      # Validate supported versions
-      if [[ "$(isCompatibleGHESVersion)" -eq "0" ]]; then
-        echo "GitHub Enterprise Server v${VERSION} is not supported."
-        exit 1;
+      if [[ "${VERSION}" == "unknown" ]]; then
+        echo "WARNING: Could not determine GitHub Enterprise Server version"
+        echo "Proceeding anyway, but API calls may fail if your GHE version is too old"
+        echo "Minimum supported: GHE v2.20"
       else
-        echo "GitHub Enterprise Server v${VERSION}"
+        # Get major/minor versions
+        VERSION_MAJOR=$(echo "${VERSION}" | cut -d "." -f 1);
+        VERSION_MINOR=$(echo "${VERSION}" | cut -d "." -f 2);
+
+        # Validate supported versions
+        if [[ "$(isCompatibleGHESVersion)" -eq "0" ]]; then
+          echo "GitHub Enterprise Server v${VERSION} is not supported."
+          exit 1;
+        else
+          echo "GitHub Enterprise Server v${VERSION}"
+        fi
       fi
     fi
   fi
