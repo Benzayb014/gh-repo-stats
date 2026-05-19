@@ -269,6 +269,10 @@ Header() {
       VERSION=$(echo "${META_DATA}" | jq -r '.installed_version // "unknown"')
 
       if [[ "${VERSION}" == "unknown" ]]; then
+        # Use the minimum supported GHES version as a safe fallback so later
+        # compatibility checks do not continue with the default 0.0 values.
+        VERSION_MAJOR="2"
+        VERSION_MINOR="20"
         echo "WARNING: Could not determine GitHub Enterprise Server version"
         echo "Proceeding anyway, but API calls may fail if your GHE version is too old"
         echo "Minimum supported: GHE v2.20"
